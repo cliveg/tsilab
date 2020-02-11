@@ -3,7 +3,7 @@ echo There were $# parameters passed.
 
 if [ -n "$1" ]; then echo "Missing parameters. Parameters = <password> <deviceid> <your-remote-public-IP>"; fi
 if [ -n "$2" ]; then 
-    echo You need to update the NSG (Network Security Group) on completion update the 4.4.4.4 to either your remote public or private IP address (or * for any) so you can RDP and SSH to the VM. 
+    echo "You need to update the NSG (Network Security Group) on completion update the 4.4.4.4 to either your remote public or private IP address (or * for any) so you can RDP and SSH to the VM."
  else
     echo "No parameters found. Parameters = <password> <deviceid> <your-remote-public-IP>" 
     exit
