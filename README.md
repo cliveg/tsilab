@@ -27,14 +27,14 @@ The parameters include:
 - ``AllowedRemoteIPAddress`` (discover this using [IPIFY](https://api.ipify.org). If you omit this parameter you can update the NSG Rule later).
 
 ```bash
-wget -O tsilab.sh https://raw.githubusercontent.com/cliveg/tsilab/master/config/edgedevicemanifest.json/tsilab.sh
+wget -O tsilab.sh https://raw.githubusercontent.com/cliveg/tsilab/master/tsilab.sh
 bash ./tsilab.sh <Password> <EnvironmentName> <AllowedRemoteIPAddress>
 ```
 
 ## Example
 
 ```bash
-wget -O tsilab.sh https://raw.githubusercontent.com/cliveg/tsilab/master/config/edgedevicemanifest.json/tsilab.sh
+wget -O tsilab.sh https://raw.githubusercontent.com/cliveg/tsilab/master/tsilab.sh
 bash ./tsilab.sh MyP!ssw0rdIs123 mytsilab123 50.1.2.3
 ```
 
