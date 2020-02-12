@@ -4,10 +4,10 @@
             "properties.desired": {
                 "modules": {
                     "publisher": {
-                        "settings": {
-                            "image": "mcr.microsoft.com/iotedge/opc-publisher:2.3",
-                            "createOptions": "{\"Hostname\":\"publisher\",\"ExposedPorts\":{\"62222/tcp\":{}},\"Cmd\":[\"--pf=/appdata/pntime.json\",\"--tc=/appdata/telemetryconfiguration.json\",\"--lf=/appdata/publisher.log\",\"--ap=/appdata/\",\"--tp=/appdata/\",\"--ip=/appdata/\",\"--aa\",\"--di=60\",\"--si=0\",\"--ms=0\"],\"HostConfig\":{\"Binds\":[\"/iiotedge:/appdata\"],\"LogConfig\":{\"Type\":\"json-file\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"3\"}},\"PortBindings\":{\"62222/tcp\":[{\"HostPort\":\"62222\"}]}}}"
-                        },
+                      "settings": {
+                        "image": "mcr.microsoft.com/iotedge/opc-publisher:2.3",
+                        "createOptions": "{\"Hostname\":\"publisher\",\"ExposedPorts\":{\"62222/tcp\":{}},\"Cmd\":[\"--pf=/appdata/pn.json\",\"--tc=/appdata/telemetryconfiguration.json\",\"--lf=/appdata/publisher.log\",\"--ap=/appdata/\",\"--tp=/appdata/\",\"--ip=/appdata/\",\"--aa\",\"--oi=10000\",\"--di=60\",\"--si=0\",\"--ms=0\"],\"HostConfig\":{\"Binds\":[\"/iiotedge:/appdata\"],\"LogConfig\":{\"Type\":\"json-file\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"3\"}},\"PortBindings\":{\"62222/tcp\":[{\"HostPort\":\"62222\"}]}}}"
+                      },
                         "type": "docker",
                         "version": "1.0",
                         "status": "running",
