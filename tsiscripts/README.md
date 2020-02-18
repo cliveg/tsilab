@@ -31,7 +31,7 @@ This another example to update and overwrite all instances **Name** property bas
 ## Example
 
 ```bash
-wget -O instance-name.sh https://raw.githubusercontent.com/cliveg/tsilab/master/tsiscripts/new-instance-name.sh
+wget -O instance-name.sh https://raw.githubusercontent.com/cliveg/tsilab/master/tsiscripts/instance-name.sh
 bash ./instance-name.sh MyP! mytsilab123
 ```
 
