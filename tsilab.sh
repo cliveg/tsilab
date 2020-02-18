@@ -53,3 +53,4 @@ echo Verify the publisher module is running by typing: sudo docker ps
 echo Verify the publisher module is connected to the simulator by entering Expert mode from the Options menu and going to the Connection Log tab
 echo Open TSI Explorer from the TSI environment in Azure Portal and check your data is flowing
 echo https://insights.timeseries.azure.com/preview?environmentId=$dataAccessID
+echo Remote Desktop to start the OPC Simulator: mstsc /v:$PUBLICIP
