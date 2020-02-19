@@ -25,14 +25,14 @@ bash ./new-instance-name.sh mytsilab123
 
 
 ## instance-name.sh
-This another example to update and overwrite all instances **Name** property based on the tagid, while leaving all other properties intact including Hierarchy. You could extend this example to use substring elements of the tagid to create hierarchy of properties
+This another example to update and overwrite all instances **Name** property based on the **tagid**, adding a **description** and generated **unit** properties from a substring of the tagid while leaving other properties intact including Hierarchy. You could extend this example to your own needs
 
 
 ## Example
 
 ```bash
 wget -O instance-name.sh https://raw.githubusercontent.com/cliveg/tsilab/master/tsiscripts/instance-name.sh
-bash ./instance-name.sh MyP! mytsilab123
+bash ./instance-name.sh mytsilab123
 ```
 
 ## Contributing

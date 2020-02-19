@@ -35,12 +35,19 @@ bash ./tsilab.sh <Password> <EnvironmentName> <AllowedRemoteIPAddress>
 
 ```bash
 wget -O tsilab.sh https://raw.githubusercontent.com/cliveg/tsilab/master/tsilab.sh
-bash ./tsilab.sh MyP!ssw0rdIs123 mytsilab123 50.1.2.3
+bash ./tsilab.sh LongP@ssword1234 mytsilab123 50.1.2.3
 ```
 
 ![Image](https://raw.githubusercontent.com/cliveg/tsilab/master/png/tsilab-opcsim.png)
 
 ![Image](https://raw.githubusercontent.com/cliveg/tsilab/master/png/tsilab-tsiexplorer.png)
+
+
+## Cleanup
+```bash
+az group delete --name <Resource Group Name>
+```
+
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
