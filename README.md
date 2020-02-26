@@ -2,6 +2,7 @@
 
 TSI Lab is Quickstart example of an OPC UA Server sending data through IoT Edge to Azure Time Series Insights (Preview PAYG).
 
+Services Deployed include: Ubuntu VM (with IoT Edge, OPC Publisher Module, OPC Simulator), IoT Hub, TSI (with Long Term Storage), and Azure Databricks.
 
 ## Getting Started
 

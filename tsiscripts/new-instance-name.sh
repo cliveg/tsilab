@@ -1,42 +1,17 @@
-if [ $# = 0 ]; then echo "No parameters found. Parameters = <tsi environment name> <tsi hierarchy id> (optional - will create sample if one doesnt exist)"; exit ; fi
-
+if [ $# = 0 ]; then echo "No parameters found. Parameters = <tsi environment name>"; exit ; fi
 export cloudShellID=$(az account show --query 'user.cloudShellID' -o tsv)
-
 if [ -n "$cloudShellID" ]; then
     echo "Authenticated using CloudShell, for this script you must re-authenticate"
     az login
  else
     echo "Authenticated already." $cloudShellID
 fi
-
-# az account set --subscription 'if needed'
-
 DEVICE=$1
 export tsienvironment=$(az resource show -g $DEVICE -n $DEVICE --resource-type Microsoft.TimeSeriesInsights/environments --query properties.dataAccessId -o tsv)
 
-# If Hierarchy parameter supplied verify it is correct, else use an existing hierarchy, or create a sample one
-if [ $# = 2 ]; then 
-    export tsiHierarchyList=$(az rest --method get --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/hierarchies/?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --query hierarchies[].id -o tsv )
-    if [[ "$tsiHierarchyList" == *"$2"* ]]; then echo "Hierarchy Exists: $2" ; tsiHierarchy=$2 ; else echo "Hierarchy Does Not Exist - please check and try again: $2" ; exit ; fi
-else export tsiHierarchy=$(az rest --method get --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/hierarchies/?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --query hierarchies[0].id -o tsv )
-fi
-
-# Get Hierarchy
-if [ -z "$tsiHierarchy" ]; then 
-    echo "No Hierarchy Exists, Creating a sample."; 
-    tsiHierarchy=$(az rest --method post --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/hierarchies/'$batch'?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --body '{"put":[{"name":"Location","source":{"instanceFieldNames":["iothub-connection-device-id","tagid"]}}]}' --query put[0].hierarchy.id -o tsv)
-    if [ -z "$tsiHierarchy" ]; then "Error."; exit ; else echo $tsiHierarchy ; fi
-else echo "A Hierarchy Exists"; fi
-
-# Get Only New Instances to Process
-searchstring='{"searchString":"","path":null,"instances":{"recursive":false,"sort":{"by":"DisplayName"},"highlights":true,"pageSize":100}}'
-export hitCount=$(az rest --method post --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/instances/search?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --body $searchstring  --query instances.hitCount)
-
-hitCount=$(($hitCount + 0))
-if [[ $hitCount = 0 ]]; then echo $hitCount New Instances to Process; exit ; fi
-
-echo Processing $hitCount New Instances
-export tsimodel=$(az rest --method post --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/instances/search?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --body $searchstring --query instances.hits)
+# Get Instances
+export tsimodel=$(az rest --method get --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/instances?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --query instances)
+#tsimodel=$(cat "test.txt")
 
 # Generate Updated Instances
 export tsiinstances=$'{ "put":'$tsimodel'}'
@@ -45,9 +20,37 @@ echo > test.txt
 
 for row in $(echo "${sample}" | jq -r '.[] | @base64'); do
     _jq() { 
-	echo ${row} | base64 --decode | jq -r ${1} 
+    	echo ${row} | base64 --decode | jq -r ${1} 
     }
-    echo  $(_jq .) | jq --arg csv $tsiHierarchy '{ timeSeriesId: .timeSeriesId, hierarchyIds: [$csv], name: .timeSeriesId[1], instanceFields: .instanceFields }' >>test.txt
+    if [ $(_jq '.timeSeriesId[1]') = 'null' ]; then
+        export description=$'DateTime'
+        export instanceFi1=$'simulator'; export instanceFi2=$'DateTime'
+    elif [ $(_jq '.timeSeriesId[1]') = 'Expression' ]; then
+        export description=$'custom mathematical expression'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    elif [ $(_jq '.timeSeriesId[1]') = 'Random' ]; then
+        export description=$'random number'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    elif [ $(_jq '.timeSeriesId[1]') = 'Square' ]; then
+        export description=$'non-sinusoidal periodic waveform in which the amplitude alternates at a steady frequency between fixed minimum and maximum'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    elif [ $(_jq '.timeSeriesId[1]') = 'Sawtooth' ]; then
+        export description=$'a kind of non-sinusoidal waveform'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    elif [ $(_jq '.timeSeriesId[1]') = 'Counter' ]; then
+        export description=$'a count from 0 to 100'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    elif [ $(_jq '.timeSeriesId[1]') = 'Sinusoid' ]; then
+        export description=$'a curve having the form of a sine wave'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    elif [ $(_jq '.timeSeriesId[1]') = 'Triangle' ]; then
+        export description=$'non-sinusoidal waveform named for its triangular shape. It is a periodic, piecewise linear, continuous real function'
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    else
+        export description=$''
+        export temp=$(_jq '.timeSeriesId[1]'); export instanceFi1=$'simulator'; export instanceFi2=${temp:0:3}
+    fi
+    echo $(_jq .) | jq --arg description "$description" --arg instanceFi1 "$instanceFi1" --arg instanceFi2 "$instanceFi2" '{ timeSeriesId: .timeSeriesId, hierarchyIds: .hierarchyIds, name: .timeSeriesId[1], description: $description, instanceFields: { system: $instanceFi1, unit: $instanceFi2} }' >>test.txt
     echo ',' >>test.txt
 done
 
@@ -57,7 +60,4 @@ tsiinstances2=$(cat test.txt)
 tsiinstances=$'{ "put":'$tsiinstances2' }'
 
 # Post Updated Instances
-echo 
-echo Post Updated Instances:
-echo $tsiinstances
 az rest --method post --uri https://$tsienvironment.env.timeseries.azure.com/timeseries/instances/'$batch'?api-version=2018-11-01-preview --resource https://api.timeseries.azure.com/ --body "$tsiinstances"
