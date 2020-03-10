@@ -22,6 +22,7 @@ export VMEXIST=$(az vm list -g $DEVICE --query [].name -o tsv)
 export appid=$(az ad app list --filter "displayName eq '$DEVICE'" --query [].appId -o tsv)
 export dataAccessID=$(az resource show -g $DEVICE --resource-type Microsoft.TimeSeriesInsights/environments -n $DEVICE --query 'properties.dataAccessId' -o tsv)
 export adbstate=$(az resource show -g $DEVICE --resource-type Microsoft.Databricks/workspaces -n $DEVICE --query 'properties.provisioningState' -o tsv)
+export subscriptionid=$(az account show --query id -o tsv)
 
 if [ $(az group exists -n $DEVICE) = false ]; then
     echo CREATE: Resource Group
@@ -112,7 +113,7 @@ if [[ $VMEXIST != *"$DEVICE"* ]]; then
 
     # for no Public IP add --public-ip-address ""
     echo CREATE: VM
-    az vm create --resource-group $DEVICE --name $DEVICE --image microsoft_iot_edge:iot_edge_vm_ubuntu:ubuntu_1604_edgeruntimeonly:latest --admin-username azureuser --authentication-type all --admin-password $ADMINPASSWORD --generate-ssh-keys --nsg "/subscriptions/d6670526-5bdd-40db-9865-f3b1bd3e7d71/resourceGroups/$DEVICE/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg" --size Standard_B2ms
+    az vm create --resource-group $DEVICE --name $DEVICE --image microsoft_iot_edge:iot_edge_vm_ubuntu:ubuntu_1604_edgeruntimeonly:latest --admin-username azureuser --authentication-type all --admin-password $ADMINPASSWORD --generate-ssh-keys --nsg "/subscriptions/$subscriptionid/resourceGroups/$DEVICE/providers/Microsoft.Network/networkSecurityGroups/databricks-nsg" --size Standard_B2ms
 
     if [ $# -gt 2 ]; then
         echo "UPDATE: NSG  for remote ip" $3
