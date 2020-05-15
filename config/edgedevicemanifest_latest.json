@@ -1,0 +1,73 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "modules": {
+          "publisher": {
+            "settings": {
+              "image": "mcr.microsoft.com/iotedge/opc-publisher:latest",
+              "createOptions": "{\"Hostname\":\"publisher\",\"ExposedPorts\":{\"62222/tcp\":{}},\"Cmd\":[\"--pf=/appdata/pn.json\",\"--fd=true\",\"--lf=/appdata/publisher.log\",\"--ap=/appdata/\",\"--tp=/appdata/\",\"--ip=/appdata/\",\"--aa\",\"--oi=10000\",\"--di=60\",\"--si=0\",\"--ms=0\"],\"HostConfig\":{\"Binds\":[\"/iiotedge:/appdata\"],\"LogConfig\":{\"Type\":\"json-file\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"3\"}},\"PortBindings\":{\"62222/tcp\":[{\"HostPort\":\"62222\"}]}}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "opctwin": {
+            "settings": {
+              "image": "mcr.microsoft.com/iotedge/opc-twin:latest",
+              "createOptions": "{\"Cmd\":[\"--AutoAccept=true\"],\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"HostConfig\":{\"NetworkMode\":\"host\"}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        },
+        "runtime": {
+          "settings": {
+            "minDockerVersion": "v1.25"
+          },
+          "type": "docker"
+        },
+        "schemaVersion": "1.0",
+        "systemModules": {
+          "edgeAgent": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": ""
+            },
+            "type": "docker"
+          },
+          "edgeHub": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"443/tcp\":[{\"HostPort\":\"443\"}],\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}]}}}"
+            },
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "routes": {
+          "opcpublisherToIoTHub": "FROM /messages/modules/publisher/* INTO $upstream",
+          "opctwinToIoTHub": "FROM /messages/modules/opctwin/* INTO $upstream"
+        },
+        "schemaVersion": "1.0",
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "publisher": {
+      "properties.desired": {}
+    },
+    "opctwin": {
+      "properties.desired": {}
+    }
+  }
+}
