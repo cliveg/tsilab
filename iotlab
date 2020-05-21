@@ -3,13 +3,12 @@ ADMINPASSWORD=$1
 DEVICE=$2
 LOCATION="westus2"
 OPCSIM="https://www.prosysopc.com/opcua/apps/JavaServer/dist/4.0.2-108/prosys-opc-ua-simulation-server-linux-4.0.2-108.sh"
-# example: bash ./iotlab.sh LongP@ssword1234 myiotlab123 50.1.2.3
+# example: bash ./iotlab.sh LongP@ssword1234 myiotlab123
 
 echo - IoT Lab - 
 echo $# parameters passed
 if [ $# = 0 ]; then echo "No parameters found. Parameters = <password> <deviceid> <your-remote-public-IP> adb"; exit ; fi
 if [ $# = 1 ]; then echo "Missing parameters. Parameters = <password> <deviceid> <your-remote-public-IP> adb"; fi
-if [ $# = 2 ]; then echo "You need to update the NSG (Network Security Group) on completion update the 4.4.4.4 to either your remote public or private IP address (or * for any) so you can RDP and SSH to the VM."; fi
 
 export VMEXIST=$(az vm list -g $DEVICE --query [].name -o tsv)
 export dataAccessID=$(az resource show -g $DEVICE --resource-type Microsoft.TimeSeriesInsights/environments -n $DEVICE --query 'properties.dataAccessId' -o tsv)
