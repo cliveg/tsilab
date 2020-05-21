@@ -1,0 +1,741 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnet-name": {
+            "type": "string",
+            "defaultValue": "vnet01",
+            "metadata": {
+                "description": "Name of new or existing vnet to which Azure Bastion should be deployed"
+            }
+        },
+        "vnet-ip-prefix": {
+            "type": "string",
+            "defaultValue": "10.1.0.0/16",
+            "metadata": {
+                "description": "IP prefix for available addresses in vnet address space"
+            }
+        },
+        "vnet-new-or-existing": {
+            "type": "string",
+            "allowedValues": [
+                "new",
+                "existing"
+            ],
+            "defaultValue": "new",
+            "metadata": {
+                "description": "Specify whether to provision new vnet or deploy to existing vnet"
+            }
+        },
+        "privatelink-subnet-ip-prefix": {
+            "type": "string",
+            "defaultValue": "10.1.1.128/27",
+            "metadata": {
+                "description": "Privatelink subnet IP prefix MUST be within vnet IP prefix address space"
+            }
+        },
+        "bastion-subnet-ip-prefix": {
+            "type": "string",
+            "defaultValue": "10.1.1.0/27",
+            "metadata": {
+                "description": "Bastion subnet IP prefix MUST be within vnet IP prefix address space"
+            }
+        },
+        "bastion-host-name": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Azure Bastion resource"
+            }
+        },
+        "databricks-nsgName": {
+            "defaultValue": "databricks-nsg",
+            "type": "string",
+            "metadata": {
+                "description": "The name of the network security group to create."
+            }
+        },
+        "databricks-workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the Azure Databricks workspace to create."
+            }
+        },
+        "databricks-pricingTier": {
+            "defaultValue": "trial",
+            "allowedValues": [
+                "trial",
+                "standard",
+                "premium"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "The pricing tier of workspace."
+            }
+        },
+        "databricks-private-subnet-ip-prefix": {
+            "type": "string",
+            "defaultValue": "10.1.2.0/24",
+            "metadata": {
+                "description": "Azure Databricks subnet IP prefix MUST be within vnet IP prefix address space"
+            }
+        },
+        "databricks-public-subnet-ip-prefix": {
+            "type": "string",
+            "defaultValue": "10.1.3.0/24",
+            "metadata": {
+                "description": "Azure Databricks subnet IP prefix MUST be within vnet IP prefix address space"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Azure region for Bastion and virtual network"
+            }
+        },
+        "iotHubName": {
+            "type": "string",
+            "defaultValue": "[concat('tsi', uniquestring(resourceGroup().id))]",
+            "metadata": {
+                "description": "The name of the source IoT hub."
+            }
+        },
+        "iotHubSku": {
+            "type": "string",
+            "defaultValue": "S1",
+            "allowedValues": [
+                "F1",
+                "S1",
+                "S2",
+                "S3",
+                "B1",
+                "B2",
+                "B3"
+            ],
+            "metadata": {
+                "description": "The name of the IoT hub Sku."
+            }
+        },
+        "iotHubSkuTier": {
+            "type": "string",
+            "defaultValue": "Standard",
+            "metadata": {
+                "description": "The billing tier for the IoT hub."
+            }
+        },
+        "consumerGroupName": {
+            "type": "string",
+            "defaultValue": "tsiquickstart",
+            "metadata": {
+                "description": "The name of the consumer group that the Time Series Insights service will use to read the data from the event hub. NOTE: To avoid resource contention, this consumer group must be dedicated to the Time Series Insights service and not shared with other readers."
+            }
+        },
+        "environmentName": {
+            "type": "string",
+            "defaultValue": "tsiquickstart",
+            "maxLength": 90,
+            "metadata": {
+                "description": "Name of the environment. The name cannot include:   '<', '>', '%', '&', ':', '\\', '?', '/' and any control characters. All other characters are allowed."
+            }
+        },
+        "environmentDisplayName": {
+            "type": "string",
+            "defaultValue": "tsiquickstart",
+            "maxLength": 90,
+            "metadata": {
+                "description": "An optional friendly name to show in tooling or user interfaces instead of the environment name."
+            }
+        },
+        "environmentSkuName": {
+            "type": "string",
+            "defaultValue": "L1",
+            "allowedValues": [
+                "L1"
+            ],
+            "metadata": {
+                "description": "The name of the sku. For more information, see https://azure.microsoft.com/pricing/details/time-series-insights/"
+            }
+        },
+        "environmentKind": {
+            "type": "string",
+            "defaultValue": "LongTerm",
+            "allowedValues": [
+                "LongTerm"
+            ],
+            "metadata": {
+                "description": "The Time Series Environment kind."
+            }
+        },
+        "environmentSkuCapacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 10,
+            "metadata": {
+                "description": "The unit capacity of the Sku. For more information, see https://azure.microsoft.com/pricing/details/time-series-insights/"
+            }
+        },
+        "environmentTimeSeriesIdProperties": {
+            "type": "array",
+            "maxLength": 3,
+            "metadata": {
+                "description": "Time Series ID acts as a partition key for your data and as a primary key for your time series model. It is important that you specify the appropriate Time Series Property ID during environment creation, since you can't change it later. Note that the Property ID is case sensitive. You can use 1-3 keys: one is required, but up to three can be used to create a composite."
+            }
+        },
+        "eventSourceName": {
+            "type": "string",
+            "defaultValue": "tsiquickstart",
+            "maxLength": 90,
+            "metadata": {
+                "description": "Name of the event source child resource. The name cannot include:   '<', '>', '%', '&', ':', '\\', '?', '/' and any control characters. All other characters are allowed."
+            }
+        },
+        "eventSourceDisplayName": {
+            "type": "string",
+            "defaultValue": "tsiquickstart",
+            "maxLength": 90,
+            "metadata": {
+                "description": "An optional friendly name to show in tooling or user interfaces instead of the event source name."
+            }
+        },
+        "eventSourceTimestampPropertyName": {
+            "type": "string",
+            "defaultValue": "",
+            "maxLength": 90,
+            "metadata": {
+                "description": "The event property that will be used as the event source's timestamp. If a value isn't specified for timestampPropertyName, or if null or empty-string is specified, the event creation time will be used."
+            }
+        },
+        "eventSourceKeyName": {
+            "type": "string",
+            "defaultValue": "service",
+            "metadata": {
+                "description": "The name of the shared access key that the Time Series Insights service will use to connect to the event hub."
+            }
+        },
+        "accessPolicyReaderObjectIds": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "A list of object ids of the users or applications in AAD that should have Reader access to the environment. The service principal objectId can be obtained by calling the Get-AzureRMADUser or the Get-AzureRMADServicePrincipal cmdlets. Creating an access policy for AAD groups is not yet supported."
+            }
+        },
+        "accessPolicyContributorObjectIds": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "A list of object ids of the users or applications in AAD that should have Contributor access to the environment. The service principal objectId can be obtained by calling the Get-AzureRMADUser or the Get-AzureRMADServicePrincipal cmdlets. Creating an access policy for AAD groups is not yet supported."
+            }
+        },
+        "storageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_ZRS"
+            ],
+            "metadata": {
+                "description": "Storage Account type for L1 TSI environments."
+            }
+        },
+        "warmStoreDataRetention": {
+            "type": "string",
+            "defaultValue": "P7D",
+            "metadata": {
+                "description": "ISO duration between 7 and 31 days. Remove the 'warmStoreConfiguration' property from the envrionment to delete the warm store."
+            }
+        },
+        "vmAdminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for the Virtual Machine."
+            }
+        },
+        "vmAdminPassword": {
+            "type": "secureString",
+            "metadata": {
+                "description": "Password for the Virtual Machine. The password must be at least 12 characters long and have lower case, upper characters, digit and a special character (Regex match)"
+            }
+        },
+        "VmSize": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "metadata": {
+                "description": "The size of the VM"
+            }
+        }
+    },
+    "variables": {
+        "public-ip-address-name": "[concat(parameters('bastion-host-name'),'-pip')]",
+        "bastion-subnet-name": "AzureBastionSubnet",
+        "databricks-private-subnet-name": "[concat(parameters('bastion-host-name'),'-private')]",
+        "databricks-public-subnet-name": "[concat(parameters('bastion-host-name'),'-public')]",
+        "databricks-nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('databricks-nsgName'))]",
+        "privatelink-subnet-name": "[concat(parameters('bastion-host-name'),'-privatelink')]",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]",
+        "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', variables('managedResourceGroupName'))]",
+        "managedResourceGroupName": "[concat('databricks-rg-', parameters('databricks-workspaceName'), '-', uniqueString(parameters('databricks-workspaceName'), resourceGroup().id))]",
+        "environmentTagsValue": {
+            "displayName": "[parameters('environmentDisplayName')]"
+        },
+        "eventSourceTagsValue": {
+            "displayName": "[parameters('eventSourceDisplayName')]"
+        },
+        "eventSourceResourceId": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+        "storageAccountName": "[concat('tsi', uniquestring(resourceGroup().id))]",
+        "privateEndpointName": "myPrivateEndpoint",
+        "privateDnsZoneName": "privatelink.azure-devices.net",
+        "pvtendpointdnsgroupname": "[concat(variables('privateEndpointName'),'/mydnsgroupname')]",
+        "vmName": "[parameters('environmentDisplayName')]",
+        "networkInterfaceName": "[concat(variables('vmName'),'NetInt')]",
+        "vmName2": "[take(concat('jumpbox', uniqueString(resourceGroup().id)),15)]",
+        "networkInterfaceName2": "[concat(variables('vmName2'),'NetInt')]",
+        "osDiskType": "Standard_LRS"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2020-03-01",
+            "name": "[parameters('iotHubName')]",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "minTlsVersion": "1.2"
+            },
+            "sku": {
+                "name": "[parameters('iotHubSku')]",
+                "tier": "[parameters('iotHubSkuTier')]",
+                "capacity": 1
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2018-02-01",
+            "name": "updateIotHubWithKeyEncryptionKey",
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/iothubs', parameters('iotHubName'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "0.9.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Devices/IotHubs",
+                            "apiVersion": "2020-03-01",
+                            "name": "[parameters('iotHubName')]",
+                            "location": "[parameters('location')]",
+                            "identity": {
+                                "type": "SystemAssigned"
+                            },
+                            "properties": {
+                                "minTlsVersion": "1.2"
+                            },
+                            "sku": {
+                                "name": "[parameters('iotHubSku')]",
+                                "tier": "[parameters('iotHubSkuTier')]",
+                                "capacity": 1
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Devices/iotHubs/eventhubEndpoints/ConsumerGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(parameters('iotHubName'), '/events/', parameters('consumerGroupName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/iothubs', parameters('iotHubName'))]",
+                "[resourceId('Microsoft.Resources/deployments', 'updateIotHubWithKeyEncryptionKey')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "linkedTemplate",
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/iothubs', parameters('iotHubName'))]",
+                "[resourceId('Microsoft.Resources/deployments', 'updateIotHubWithKeyEncryptionKey')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-timeseriesinsights-environment-payg-with-iothub/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "iotHubNewOrExisting": {
+                        "value": "existing"
+                    },
+                    "iotHubName": {
+                        "value": "[parameters('iotHubName')]"
+                    },
+                    "iotHubResourceGroup": {
+                        "value": "[resourceGroup().name]"
+                    },
+                    "consumerGroupName": {
+                        "value": "[parameters('consumerGroupName')]"
+                    },
+                    "environmentName": {
+                        "value": "[parameters('environmentName')]"
+                    },
+                    "environmentDisplayName": {
+                        "value": "[parameters('environmentDisplayName')]"
+                    },
+                    "environmentTimeSeriesIdProperties": {
+                        "value": "[parameters('environmentTimeSeriesIdProperties')]"
+                    },
+                    "eventSourceTimestampPropertyName": {
+                        "value": "[parameters('eventSourceTimestampPropertyName')]"
+                    },
+                    "eventSourceName": {
+                        "value": "[parameters('eventSourceName')]"
+                    },
+                    "eventSourceDisplayName": {
+                        "value": "[parameters('eventSourceDisplayName')]"
+                    },
+                    "accessPolicyContributorObjectIds":{
+                        "value": "[parameters('accessPolicyContributorObjectIds')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2019-02-01",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "name": "[variables('public-ip-address-name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            }
+        },
+        {
+            "apiVersion": "2019-06-01",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "location": "[parameters('location')]",
+            "name": "[parameters('databricks-nsgName')]"
+        },
+        {
+            "apiVersion": "2019-02-01",
+            "name": "[parameters('vnet-name')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('databricks-nsgName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vnet-ip-prefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('privatelink-subnet-name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('privatelink-subnet-ip-prefix')]",
+                            "privateEndpointNetworkPolicies": "Disabled"
+                        }
+                    },
+                    {
+                        "name": "[variables('bastion-subnet-name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('bastion-subnet-ip-prefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('databricks-private-subnet-name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('databricks-private-subnet-ip-prefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[variables('databricks-nsgId')]"
+                            },
+                            "delegations": [
+                                {
+                                    "name": "databricks-del-private",
+                                    "properties": {
+                                        "serviceName": "Microsoft.Databricks/workspaces"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "[variables('databricks-public-subnet-name')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('databricks-public-subnet-ip-prefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[variables('databricks-nsgId')]"
+                            },
+                            "delegations": [
+                                {
+                                    "name": "databricks-del-public",
+                                    "properties": {
+                                        "serviceName": "Microsoft.Databricks/workspaces"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2018-10-01",
+            "type": "Microsoft.Network/bastionHosts",
+            "name": "[parameters('bastion-host-name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('public-ip-address-name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "IpConf",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet-name'), variables('bastion-subnet-name'))]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('public-ip-address-name'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('privateEndpointName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]",
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+                "[resourceId('Microsoft.Devices/IotHubs/eventHubEndpoints/ConsumerGroups', parameters('iotHubName'), 'events', parameters('consumerGroupName'))]"
+            ],
+            "properties": {
+                "subnet": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet-name'), variables('privatelink-subnet-name'))]"
+                },
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[variables('privateEndpointName')]",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+                            "groupIds": [
+                                "iotHub"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones",
+            "apiVersion": "2018-09-01",
+            "name": "[variables('privateDnsZoneName')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+            "apiVersion": "2018-09-01",
+            "name": "[concat(variables('privateDnsZoneName'), '/', variables('privateDnsZoneName'), '-link')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsZoneName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]"
+            ],
+            "properties": {
+                "registrationEnabled": false,
+                "virtualNetwork": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('pvtendpointdnsgroupname')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsZoneName'))]",
+                "[variables('privateEndpointName')]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "config1",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsZoneName'))]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-09-01",
+            "name": "[variables('networkInterfaceName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]"
+            ],
+            "tags": {
+                "displayName": "[variables('networkInterfaceName')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet-name'), variables('privatelink-subnet-name'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('vmName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "plan": {
+                "name": "ubuntu_1604_edgeruntimeonly",
+                "publisher": "microsoft_iot_edge",
+                "product": "iot_edge_vm_ubuntu"
+            },
+            "tags": {
+                "displayName": "[variables('vmName')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('VmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('vmAdminUsername')]",
+                    "adminPassword": "[parameters('vmAdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "microsoft_iot_edge",
+                        "offer": "iot_edge_vm_ubuntu",
+                        "sku": "ubuntu_1604_edgeruntimeonly",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('vmName'),'OsDisk')]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": []
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2019-09-01",
+            "name": "[variables('networkInterfaceName2')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnet-name'))]"
+            ],
+            "tags": {
+                "displayName": "[variables('networkInterfaceName2')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet-name'), variables('privatelink-subnet-name'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('vmName2')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName2'))]"
+            ],
+            "tags": {
+                "displayName": "[variables('vmName2')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('VmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName2')]",
+                    "adminUsername": "[parameters('vmAdminUsername')]",
+                    "adminPassword": "[parameters('vmAdminPassword')]",
+                    "windowsConfiguration": {
+                        "enableAutomaticUpdates": true,
+                        "provisionVmAgent": true
+                    }                    
+                },
+                "licenseType": "Windows_Client",                
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsDesktop",
+                        "offer": "Windows-10",
+                        "sku": "19h2-pro",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "[concat(variables('vmName2'),'OsDisk')]",
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('osDiskType')]"
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName2'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": []
+        }
+    ]
+}
