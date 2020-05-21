@@ -287,7 +287,7 @@
         "privateEndpointName": "myPrivateEndpoint",
         "privateDnsZoneName": "privatelink.azure-devices.net",
         "pvtendpointdnsgroupname": "[concat(variables('privateEndpointName'),'/mydnsgroupname')]",
-        "vmName": "[parameters('environmentDisplayName')]",
+        "vmName": "[parameters('iotHubName')]",
         "networkInterfaceName": "[concat(variables('vmName'),'NetInt')]",
         "vmName2": "[take(concat('jumpbox', uniqueString(resourceGroup().id)),15)]",
         "networkInterfaceName2": "[concat(variables('vmName2'),'NetInt')]",
