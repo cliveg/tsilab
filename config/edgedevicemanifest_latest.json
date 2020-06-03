@@ -37,7 +37,14 @@
               "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
               "createOptions": ""
             },
-            "type": "docker"
+            "type": "docker",
+            "env": {
+              "ExperimentalFeatures__Enabled": {
+                "value": "true"
+              },
+              "ExperimentalFeatures__EnableUploadLogs": {
+                "value": "true"
+              }            
           },
           "edgeHub": {
             "settings": {
