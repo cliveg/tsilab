@@ -85,11 +85,11 @@ docker logs publisher
 
 ## Reference - Useful IoT Edge Links
 ### General
-[Azure IoT-Edge Product Updates](https://azure.microsoft.com/en-us/updates/?product=iot-edge)
-[Upgrade IoT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-update-iot-edge)
-[IoT Edge Agent Docker Image Tag List](https://mcr.microsoft.com/v2/azureiotedge-agent/tags/list)
-[IoT Edge Hub Docker Image Tag List](https://mcr.microsoft.com/v2/azureiotedge-hub/tags/list)
-[IoT Edge VM Deploy](https://github.com/azure/iotedge-vm-deploy)
+- [Azure IoT-Edge Product Updates](https://azure.microsoft.com/en-us/updates/?product=iot-edge)
+- [Upgrade IoT Edge](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-update-iot-edge)
+- [IoT Edge Agent Docker Image Tag List](https://mcr.microsoft.com/v2/azureiotedge-agent/tags/list)
+- [IoT Edge Hub Docker Image Tag List](https://mcr.microsoft.com/v2/azureiotedge-hub/tags/list)
+- [IoT Edge VM Deploy](https://github.com/azure/iotedge-vm-deploy)
 
 ### Industrial IoT Platform Related
 #### OPC UA
@@ -97,7 +97,7 @@ docker logs publisher
 - [Deploying Azure Industrial IoT Platform and dependencies](https://github.com/Azure/Industrial-IoT/blob/master/docs/deploy/howto-deploy-all-in-one.md)
 - [Telemetry Message Format](https://github.com/Azure/Industrial-IoT/blob/master/docs/dev-guides/telemetry-messages-format.md)
 - [IoT Edge OPC Publisher Docker Image Tag List](https://mcr.microsoft.com/v2/iotedge/opc-publisher/tags/list)
-[Discover and register servers and browse their address space, read and publish nodes via REST API in Postman](https://github.com/Azure/Industrial-IoT/blob/master/docs/tutorials/tut-use-postman.md)
+- [Discover and register servers and browse their address space, read and publish nodes via REST API in Postman](https://github.com/Azure/Industrial-IoT/blob/master/docs/tutorials/tut-use-postman.md)
 
 #### OPC DA
 OPC DA (known as OPC Classic in contrast to the newer OPC UA standard) is a protocol which is based on Microsoft COM technology, which means is has to run on Windows systems. Use a OPC UA to OPC DA bridge from a partner or using the OPC Foundation OPC UA to OPC DA wrapper available in the OPC Foundation github repository (https://github.com/OPCFoundation/UA-.NETStandard/blob/master/ComIOP/README.md) running outside if IoT Edge. 
@@ -108,10 +108,10 @@ OPC DA (known as OPC Classic in contrast to the newer OPC UA standard) is a prot
 - [Capadata](https://www.copadata.com/en/news/news/available-now-from-microsoft-azure-marketplace-zenon-on-iot-edge-7824/)
 
 ### IoT Edge Monitoring
-[Built-in logs collation and upload capability](https://aka.ms/iotedgelogpull) - On-demand Log Pull
-[Continuous Log Push to Log Analytics](https://github.com/veyalla/logspout-loganalytics)
-[Azure IoT Edge Hub experimental metrics](https://github.com/veyalla/ehm) 
-[IoT GBBs Repo](https://github.com/AzureIoTGBB) -  edge monitoring example 
+- [Built-in logs collation and upload capability](https://aka.ms/iotedgelogpull) - On-demand Log Pull
+- [Continuous Log Push to Log Analytics](https://github.com/veyalla/logspout-loganalytics)
+- [Azure IoT Edge Hub experimental metrics](https://github.com/veyalla/ehm) 
+- [IoT GBBs Repo](https://github.com/AzureIoTGBB) -  edge monitoring example 
 
 ### IoT Edge High Availability
 [Deploy IoT Edge on Kubernetes (Preview)](http://aka.ms/edgek8sdoc) - using it as a resilient, highly available infrastructure layer. 
