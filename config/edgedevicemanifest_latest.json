@@ -44,7 +44,9 @@
               },
               "ExperimentalFeatures__EnableUploadLogs": {
                 "value": "true"
-              }            
+              }
+            }
+
           },
           "edgeHub": {
             "settings": {
