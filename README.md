@@ -82,6 +82,10 @@ docker logs edgeAgent --tail 100
 docker logs edgeHub --tail 100
 docker logs publisher
 ```
+Monitor IoT Hub Messages - i added to built-in endpoints a consumer group called monitor
+```
+az iot hub monitor-events --hub-name tsilab --device-id tsilab --cg monitor
+```
 
 ## Reference - Useful IoT Edge Links
 ### General
@@ -94,6 +98,7 @@ docker logs publisher
 ### Industrial IoT Platform Related
 #### OPC UA
 [Azure Industrial IoT Platform](https://github.com/Azure/Industrial-IoT)
+- [Using Azure Data Explorer for OPC UA](https://www.linkedin.com/pulse/using-azure-data-explorer-opc-ua-erich-barnstedt/)
 - [Deploying Azure Industrial IoT Platform and dependencies](https://github.com/Azure/Industrial-IoT/blob/master/docs/deploy/howto-deploy-all-in-one.md)
 - [Telemetry Message Format](https://github.com/Azure/Industrial-IoT/blob/master/docs/dev-guides/telemetry-messages-format.md)
 - [IoT Edge OPC Publisher Docker Image Tag List](https://mcr.microsoft.com/v2/iotedge/opc-publisher/tags/list)
